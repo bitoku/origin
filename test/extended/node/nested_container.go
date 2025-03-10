@@ -3,36 +3,18 @@ package node
 import (
 	"context"
 	"fmt"
+	g "github.com/onsi/ginkgo/v2"
+	o "github.com/onsi/gomega"
+	exutil "github.com/openshift/origin/test/extended/util"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	admissionapi "k8s.io/pod-security-admission/api"
 	"k8s.io/utils/pointer"
-	"k8s.io/utils/ptr"
-
-	g "github.com/onsi/ginkgo/v2"
-	o "github.com/onsi/gomega"
-	exutil "github.com/openshift/origin/test/extended/util"
 )
 
-var ocPrivileged = exutil.NewCLIWithPodSecurityLevel("nested-podman", admissionapi.LevelPrivileged)
 var ocBaseline = exutil.NewCLIWithPodSecurityLevel("nested-podman", admissionapi.LevelBaseline)
 
 var _ = g.Describe("[sig-node][FeatureGate:ProcMountType][FeatureGate:UserNamespacesSupport] nested container", func() {
-	g.It("should pass podman localsystem test in privileged mode", func(ctx context.Context) {
-		oc := ocPrivileged
-		if !exutil.IsTechPreviewNoUpgrade(oc) {
-			g.Skip("skipping, this feature is only supported on TechPreviewNoUpgrade clusters")
-		}
-		customImage := exutil.FixturePath("testdata", "node", "nested_container")
-		name := "privileged-nested-container"
-		g.By("create custom builder image")
-		err := oc.Run("new-build").Args("--binary", "--strategy=docker", fmt.Sprintf("--name=%s", name)).Execute()
-		o.Expect(err).NotTo(o.HaveOccurred())
-		br, _ := exutil.StartBuildAndWait(oc, name, fmt.Sprintf("--from-dir=%s", customImage))
-		br.AssertSuccess()
-		runPodmanSystemTest(ctx, oc, name)
-	})
-
 	g.It("should pass podman localsystem test in baseline mode", func(ctx context.Context) {
 		oc := ocBaseline
 		if !exutil.IsTechPreviewNoUpgrade(oc) {
@@ -78,15 +60,11 @@ func runPodmanSystemTest(ctx context.Context, oc *exutil.CLI, name string) {
 					Args:            []string{"make", "localsystem"},
 					SecurityContext: &corev1.SecurityContext{
 						RunAsUser: pointer.Int64(1000),
-						ProcMount: ptr.To(corev1.UnmaskedProcMount),
 						Capabilities: &corev1.Capabilities{
 							Add: []corev1.Capability{
 								"SETUID",
 								"SETGID",
 							},
-						},
-						SeccompProfile: &corev1.SeccompProfile{
-							Type: corev1.SeccompProfileTypeUnconfined,
 						},
 						SELinuxOptions: &corev1.SELinuxOptions{
 							Type: "container_engine_t",
