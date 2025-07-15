@@ -81,6 +81,22 @@ spec:
     - testName: '[sig-storage] CSI Mock honor pv reclaim policy [Feature:HonorPVReclaimPolicy]
         [FeatureGate:HonorPVReclaimPolicy] [Beta] CSI honor pv reclaim policy using
         mock driver Static provisioning should honor pv retain reclaim policy'
+  - featureGate: ImageVolume
+    tests:
+    - testName: '[sig-node] [FeatureGate:ImageVolume] ImageVolume should fail when
+        image does not exist'
+    - testName: '[sig-node] [FeatureGate:ImageVolume] ImageVolume should handle multiple
+        image volumes'
+    - testName: '[sig-node] [FeatureGate:ImageVolume] ImageVolume should succeed if
+        image volume is not existing but unused'
+    - testName: '[sig-node] [FeatureGate:ImageVolume] ImageVolume should succeed with
+        multiple pods and same image on the same node'
+    - testName: '[sig-node] [FeatureGate:ImageVolume] ImageVolume should succeed with
+        pod and pull policy of Always'
+    - testName: '[sig-node] [FeatureGate:ImageVolume] ImageVolume when subPath is
+        used should fail to mount image volume with invalid subPath'
+    - testName: '[sig-node] [FeatureGate:ImageVolume] ImageVolume when subPath is
+        used should handle image volume with subPath'
   - featureGate: ManagedBootImages
     tests:
     - testName: '[sig-mco][OCPFeatureGate:ManagedBootImages][Serial] Should degrade
